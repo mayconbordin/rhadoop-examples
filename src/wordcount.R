@@ -1,0 +1,16 @@
+## Load and initialize libraries
+library(rhdfs)
+hdfs.init()
+library(rmr2)
+
+# Define the wordcount application
+wordcount = function(input, output = NULL, pattern = '[[:punct:][:space:]]+') {
+  wc.map <- function(., lines) {
+    keyval(tolower(unlist( strsplit( x = lines,split = pattern))), 1)
+  }
+  wc.reduce <- function(word, counts ) {
+    keyval(word, sum(counts))
+  } 
+  mapreduce(input = input, output = output, input.format = "text",
+            map = wc.map, reduce = wc.reduce, combine = T)
+}
